@@ -71,6 +71,9 @@ def getConfig(config_file):
 
 working, save_data, sleep_time, Ts_set, Tc_set, To_set, avg_coef, P_1, I_1, D_1, scale_1, P_2, I_2, D_2, scale_2, P_3, I_3, D_3, scale_3, P_4, I_4, D_4, scale_4, GAIN, flow_CH, flow_coef, flow_set, db_host, db_port, db_name, col_name  = getConfig(config_file)
 
+#TODO
+#flow_set_1, flow_set_2
+
 # list of GPIO
 PIN_3 = 2
 PIN_5 = 3
@@ -238,13 +241,16 @@ pwm_3.start(0)
 bus = SMBus(1)
 
 def get_flow():
-    flow_data = bus.read_i2c_block_data(0x07, 0, 2)
-    flow_lpm = flow_coef*((flow_data[0] << 8) + flow_data[1])/1000
-    return flow_lpm
+    sensirion_1 = read_sensor(1)
+    sensirion_2 = read_sensor(2)
+    return sensirion_1, sensirion_2
 
 pid_4 = PID(P_4, I_4, D_4, setpoint=flow_set) # air pump
 pwm_4 = GPIO.PWM(GPIO_air_pump,150)
 pwm_4.start(0)
+
+#TODO
+#pwm_5
 
 # initialize ADC converter
 def ReadADC():
@@ -322,8 +328,10 @@ while working:
     pwm_3.ChangeDutyCycle(dc_3)
 
     ## flow rate
-    flow = get_flow()
-    dc_4 = pid_4(flow)
+    flow_1, flow_2 = get_flow()
+    print(f"flow_1: {flow_1}, flow_2: {flow_2}")
+    
+    dc_4 = pid_4(flow_1)
     #dc_4 = 20
     if dc_4 > 100: # duty cycle should between 0-100
         dc_4 = 100
@@ -331,6 +339,9 @@ while working:
         dc_4 = 0
     dc_4 = dc_4*scale_4
     pwm_4.ChangeDutyCycle(dc_4)
+
+    #TODO
+    #pwm_5
 
     # Read scatter mode voltage
     voltage = ReadADC()
