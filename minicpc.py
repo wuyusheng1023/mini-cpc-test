@@ -330,7 +330,7 @@ while working:
     ## flow rate
     flow_1, flow_2 = get_flow()
     print(f"flow_1: {flow_1}, flow_2: {flow_2}")
-    
+
     dc_4 = pid_4(flow_1)
     #dc_4 = 20
     if dc_4 > 100: # duty cycle should between 0-100
