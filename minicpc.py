@@ -19,7 +19,7 @@ import json
 
 # from pubsub import publish
 
-from .sensirion.sensirion import 
+from .sensirion.sensirion import read_sensor
 
 ############################################################
 ############################################################
