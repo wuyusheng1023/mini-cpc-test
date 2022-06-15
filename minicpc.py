@@ -17,7 +17,10 @@ from smbus2 import SMBus
 from subprocess import call
 import json
 
-from pubsub import publish
+# from pubsub import publish
+
+from .sensirion.sensirion import 
+
 ############################################################
 ############################################################
 
