@@ -58,6 +58,10 @@ def getConfig(config_file):
     I_4 = float(settings['I_4'])
     D_4 = float(settings['D_4'])
     scale_4 = float(settings['scale_4'])
+    P_5 = float(settings['P_5'])
+    I_5 = float(settings['I_5'])
+    D_5 = float(settings['D_5'])
+    scale_5 = float(settings['scale_5'])
     GAIN = float(settings['GAIN'])
     flow_CH = int(settings['flow_CH'])
     flow_coef = float(settings['flow_coef'])
@@ -66,13 +70,10 @@ def getConfig(config_file):
     db_port = int(settings['db_port'])
     db_name = settings['db_name']
     col_name = settings['col_name']
-    return working, save_data, sleep_time, Ts_set, Tc_set, To_set, avg_coef, P_1, I_1, D_1, scale_1, P_2, I_2, D_2, scale_2, P_3, I_3, D_3, scale_3, P_4, I_4, D_4, scale_4, GAIN, flow_CH, flow_coef, flow_set, db_host, db_port, db_name, col_name
+    return working, save_data, sleep_time, Ts_set, Tc_set, To_set, avg_coef, P_1, I_1, D_1, scale_1, P_2, I_2, D_2, scale_2, P_3, I_3, D_3, scale_3, P_4, I_4, D_4, scale_4, P_5, I_5, D_5, scale_5, GAIN, flow_CH, flow_coef, flow_set, db_host, db_port, db_name, col_name
 
 
-working, save_data, sleep_time, Ts_set, Tc_set, To_set, avg_coef, P_1, I_1, D_1, scale_1, P_2, I_2, D_2, scale_2, P_3, I_3, D_3, scale_3, P_4, I_4, D_4, scale_4, GAIN, flow_CH, flow_coef, flow_set, db_host, db_port, db_name, col_name  = getConfig(config_file)
-
-#TODO
-#flow_set_1, flow_set_2
+working, save_data, sleep_time, Ts_set, Tc_set, To_set, avg_coef, P_1, I_1, D_1, scale_1, P_2, I_2, D_2, scale_2, P_3, I_3, D_3, scale_3, P_4, I_4, D_4, scale_4, P_5, I_5, D_5, scale_5, GAIN, flow_CH, flow_coef, flow_set, db_host, db_port, db_name, col_name  = getConfig(config_file)
 
 # list of GPIO
 PIN_3 = 2
@@ -111,7 +112,8 @@ GPIO_poweroff = PIN_32
 GPIO_heater_sat = PIN_15
 GPIO_cooler = PIN_22
 GPIO_heater_OPC = PIN_16
-GPIO_air_pump = PIN_13
+GPIO_air_pump_1 = PIN_13
+GPIO_air_pump_2 = PIN_12
 GPIO_csSat = PIN_31
 GPIO_csCon = PIN_11
 GPIO_csOPC = PIN_37
@@ -132,7 +134,8 @@ GPIO.setup(GPIO_OPC, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # input, counter
 GPIO.setup(GPIO_heater_sat,GPIO.OUT) # output, saturator heater
 GPIO.setup(GPIO_cooler,GPIO.OUT) # output, cooler
 GPIO.setup(GPIO_heater_OPC,GPIO.OUT) # output, saturator heater
-GPIO.setup(GPIO_air_pump,GPIO.OUT) # output
+GPIO.setup(GPIO_air_pump_1,GPIO.OUT) # output
+GPIO.setup(GPIO_air_pump_2,GPIO.OUT) # output
 GPIO.setup(GPIO_csSat, GPIO.OUT) # saturator temperature ADC Chip Select pin
 GPIO.setup(GPIO_csCon, GPIO.OUT) # condenser temperature ADC Chip Select pin
 GPIO.setup(GPIO_csOPC, GPIO.OUT) # OPC temperature ADC Chip Select pin
@@ -148,7 +151,8 @@ GPIO.output(GPIO_csOPC, GPIO.HIGH) #set chip select pin to high according to dat
 GPIO.output(GPIO_mosi, GPIO.LOW) #set set mosi low
 GPIO.output(GPIO_clk, GPIO.LOW) #set serial clock low
 GPIO.output(GPIO_onled, GPIO.HIGH) #turn on power on led
-GPIO.output(GPIO_air_pump, GPIO.HIGH)
+GPIO.output(GPIO_air_pump_1, GPIO.HIGH)
+GPIO.output(GPIO_air_pump_2, GPIO.HIGH)
 
 #init averaging
 avg_conc = 0
@@ -246,11 +250,12 @@ def get_flow():
     return sensirion_1, sensirion_2
 
 pid_4 = PID(P_4, I_4, D_4, setpoint=flow_set) # air pump
-pwm_4 = GPIO.PWM(GPIO_air_pump,150)
+pwm_4 = GPIO.PWM(GPIO_air_pump_1,150)
 pwm_4.start(0)
 
-#TODO
-#pwm_5
+pid_5 = PID(P_5, I_5, D_5, setpoint=flow_set) # air pump
+pwm_5 = GPIO.PWM(GPIO_air_pump_2,150)
+pwm_5.start(0)
 
 # initialize ADC converter
 def ReadADC():
@@ -283,7 +288,7 @@ print('************************')
 while working:
     
     # load settings
-    working, save_data, sleep_time, Ts_set, Tc_set, To_set, avg_coef, P_1, I_1, D_1, scale_1, P_2, I_2, D_2, scale_2, P_3, I_3, D_3, scale_3, P_4, I_4, D_4, scale_4, GAIN, flow_CH, flow_coef, flow_set, db_host, db_port, db_name, col_name = getConfig(config_file)
+    working, save_data, sleep_time, Ts_set, Tc_set, To_set, avg_coef, P_1, I_1, D_1, scale_1, P_2, I_2, D_2, scale_2, P_3, I_3, D_3, scale_3, P_4, I_4, D_4, scale_4, P_5, I_5, D_5, scale_5, GAIN, flow_CH, flow_coef, flow_set, db_host, db_port, db_name, col_name = getConfig(config_file)
 
     # get datettime
     date_time = datetime.utcnow() + timedelta(hours=2) # get system date-time in UTC+2
@@ -340,8 +345,14 @@ while working:
     dc_4 = dc_4*scale_4
     pwm_4.ChangeDutyCycle(dc_4)
 
-    #TODO
-    #pwm_5
+    dc_5 = pid_5(flow_2)
+    #dc_5 = 20
+    if dc_5 > 100: # duty cycle should between 0-100
+        dc_5 = 100
+    elif dc_5 < 0:
+        dc_5 = 0
+    dc_5 = dc_5*scale_5
+    pwm_5.ChangeDutyCycle(dc_5)
 
     #TODO
     #ADC
@@ -372,6 +383,8 @@ while working:
             # f.write(',')
             f.write(str(flow))
             f.write(',')
+            f.write(str(flow_2))
+            f.write(',')
             f.write(str(round(To)))
             f.write(',')
             f.write(str(round(Ts)))
@@ -389,7 +402,8 @@ while working:
             'Ts': Ts,
             'Tc': Tc,
             'To': To,
-            'flow': flow
+            'flow': flow,
+            'flow_2': flow_2
         }
         # publish(data_dict)
 
@@ -411,8 +425,10 @@ while working:
     print(round(dc_2, 1), end = ' ,')
     print(round(dc_3, 1))
     #print(round(dc_4, 1))
-    print('Flow = ',round(flow, 3),' lpm')
+    print('Flow_1 = ',round(flow, 3),' lpm')
+    print('Flow_2 = ',round(flow_2, 3),' lpm')
     print(round(dc_4, 2))
+    print(round(dc_5, 2))
     # print('Scatter voltage = ', round(voltage, 4), 'V')
     print('corrected concentration = ', round(concdd))
     print('average concentration = ', round(avg_conc))
