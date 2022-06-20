@@ -337,21 +337,21 @@ while working:
     print(f"flow_1: {flow_1}, flow_2: {flow_2}")
 
     dc_4 = pid_4(flow_1)
-    #dc_4 = 20
     if dc_4 > 100: # duty cycle should between 0-100
         dc_4 = 100
     elif dc_4 < 0:
         dc_4 = 0
     dc_4 = dc_4*scale_4
+    dc_4 = 30
     pwm_4.ChangeDutyCycle(dc_4)
 
     dc_5 = pid_5(flow_2)
-    #dc_5 = 20
     if dc_5 > 100: # duty cycle should between 0-100
         dc_5 = 100
     elif dc_5 < 0:
         dc_5 = 0
     dc_5 = dc_5*scale_5
+    dc_5 = 30
     pwm_5.ChangeDutyCycle(dc_5)
 
     #TODO
