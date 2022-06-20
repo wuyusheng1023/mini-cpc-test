@@ -391,7 +391,7 @@ while working:
             'To': To,
             'flow': flow
         }
-        publish(data_dict)
+        # publish(data_dict)
 
         data_dict['dttm'] = dttm
         collection.insert_one(data_dict)
