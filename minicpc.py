@@ -257,6 +257,10 @@ pid_5 = PID(P_5, I_5, D_5, setpoint=flow_set) # air pump
 pwm_5 = GPIO.PWM(GPIO_air_pump_2,150)
 pwm_5.start(0)
 
+#TODO
+# PIN29 liquid sensor
+# PIN18 liquid valve
+
 # initialize ADC converter
 def ReadADC():
     LSBsize = 3.3/pow(2,8) #reference voltage divided by bit size (8bit ADC bit size = 2^8)
