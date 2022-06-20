@@ -343,30 +343,33 @@ while working:
     #TODO
     #pwm_5
 
+    #TODO
+    #ADC
     # Read scatter mode voltage
-    voltage = ReadADC()
+    # voltage = ReadADC()
 
     sample_time = time_delta.seconds + time_delta.microseconds*10**(-6)
 
+    flow = flow_1
     if flow > 0.01:
         concdd = counts/(flow*1000/60)/sample_time
     else:
         conc = 0
     #averaging
     cumul_conc += concdd
-    cumul_volt += voltage
+    # cumul_volt += voltage
     avg += 1
 
     if avg == avg_coef:
         avg_conc = cumul_conc / avg_coef
-        avg_voltage = cumul_volt / avg_coef
+        # avg_voltage = cumul_volt / avg_coef
         with open("/home/pi/data/"+filename, 'a') as f:
             f.write(str(date_time))
             f.write(',')
             f.write(str(round(avg_conc)))
             f.write(',')
-            f.write(str(round(avg_voltage, 3)))
-            f.write(',')
+            # f.write(str(round(avg_voltage, 3)))
+            # f.write(',')
             f.write(str(flow))
             f.write(',')
             f.write(str(round(To)))
@@ -382,7 +385,7 @@ while working:
         data_dict = {
             'dttm': dttm_str,
             'conc': avg_conc,
-            'volt': avg_voltage,
+            # 'volt': avg_voltage,
             'Ts': Ts,
             'Tc': Tc,
             'To': To,
@@ -395,7 +398,7 @@ while working:
 
         avg = 0
         cumul_conc = 0
-        cumul_volt = 0
+        # cumul_volt = 0
 
     #print all
     print('************************************************************************')
@@ -410,7 +413,7 @@ while working:
     #print(round(dc_4, 1))
     print('Flow = ',round(flow, 3),' lpm')
     print(round(dc_4, 2))
-    print('Scatter voltage = ', round(voltage, 4), 'V')
+    # print('Scatter voltage = ', round(voltage, 4), 'V')
     print('corrected concentration = ', round(concdd))
     print('average concentration = ', round(avg_conc))
 #    print('noncorected concentration = ', round(conc))
