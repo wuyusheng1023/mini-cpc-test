@@ -394,7 +394,7 @@ while working:
         # publish(data_dict)
 
         data_dict['dttm'] = dttm
-        collection.insert_one(data_dict)
+        # collection.insert_one(data_dict)
 
         avg = 0
         cumul_conc = 0
